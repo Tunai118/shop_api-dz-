@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Category, Product, Review
-
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,3 +55,18 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Оценка должна быть от 1 до 5")
         return value
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "password"]
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            password=validated_data["password"],
+            is_active=False
+        )
+        return user
